@@ -3,18 +3,20 @@
 namespace App\Utilities;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class STPUtility
 {
+
     /**
      * @param Model $model
      * @return string
      */
-    public function generateAccountNumber(Model $model): string
+    public static function generateAccountNumber(Model $model): string
     {
         $clientNumber = str_pad($model->id,7,"0", STR_PAD_LEFT);
-        $accountNumber = "{$clientNumber}";
-        $verifiedDigit = $this->getVerifiedDigit($accountNumber);
+        $accountNumber = "6461803687{$clientNumber}";
+        $verifiedDigit = (new STPUtility())->getVerifiedDigit($accountNumber);
         return "$accountNumber$verifiedDigit";
     }
 
@@ -39,4 +41,32 @@ class STPUtility
         });
         return (10 - (collect($result)->sum() % 10) % 10);
     }
+
+    public static function sign(array $data)
+    {
+        $privateKey = (new STPUtility())->getCertified();
+        $binarySign="";
+        $originalString = (new STPUtility())->getOriginalString($data);
+        //dd_json($originalString);
+        openssl_sign($originalString, $binarySign, $privateKey, "RSA-SHA256");
+        $sign = base64_encode($binarySign);
+        //openssl_free_key($privateKey);
+        return $sign;
+    }
+
+    private function getCertified()
+    {
+        return openssl_get_privatekey(Storage::get('key/privateKeyDev.pem'), env('STP_PEM_PASSWORD'));
+    }
+
+    private function getOriginalString(array $data)
+    {
+        $originalString = collect(array_values($data))->implode('|');
+        return "||{$originalString}||";
+    }
+
+
+
+
+
 }

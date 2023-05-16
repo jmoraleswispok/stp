@@ -21,4 +21,6 @@ require (__DIR__ . '/api/authenticated.php');
 Route::prefix('stp')->group(function () {
     Route::post('test', STPTestController::class);
     Route::post('check-account-balance', [STPTestController::class, 'checkAccountBalance']);
+    Route::post('register-order', [STPTestController::class, 'registerOrder']);
+    Route::post('conciliation', [STPTestController::class, 'conciliation']);
 });

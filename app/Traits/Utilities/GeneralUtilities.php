@@ -84,7 +84,7 @@ trait GeneralUtilities
      * @param int $length
      * @return string
      */
-    private function randomNumber(int $length = 6): string
+    public function randomNumber(int $length = 6): string
     {
         $result = '';
         for($i = 0; $i < $length; $i++) {

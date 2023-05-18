@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\STPTest\CheckAccountBalanceRequest;
+use App\Http\Requests\STPTest\ConciliationRequest;
+use App\Http\Requests\STPTest\RegisterOrderRequest;
 use App\Utilities\ModelUtility;
 use App\Utilities\STPUtility;
 use Carbon\Carbon;
@@ -34,14 +37,14 @@ class STPTestController extends Controller
     /**
      * @return JsonResponse
      */
-    public function checkAccountBalance(): JsonResponse
+    public function checkAccountBalance(CheckAccountBalanceRequest $request): JsonResponse
     {
         try
         {
             $data = [
-                'empresa' => "WISPOK",
-                'cuentaOrdenante' => "646180368700000009",
-                'fecha' => ""
+                'empresa' => env('STP_COMPANY'),
+                'cuentaOrdenante' => env('STP_ORDERING_ACCOUNT'),
+                'fecha' => ModelUtility::nullSafeForString($request->input('date'))
             ];
             $data['firma'] = STPUtility::sign($data);
             $responseStp = Http::baseUrl(env('STP_URL'))->post("consultaSaldoCuenta", $data);
@@ -54,7 +57,7 @@ class STPTestController extends Controller
     /**
      * @return JsonResponse
      */
-    public function registerOrder(): JsonResponse
+    public function registerOrder(RegisterOrderRequest $request): JsonResponse
     {
         try
         {
@@ -62,16 +65,16 @@ class STPTestController extends Controller
             $claveRastreo = "{$this->randomNumber(5)}WISPOK{$day->format('Ymd')}{$day->timestamp}";
             $data = [
                 'institucionContraparte' => "90646",
-                'empresa' => "WISPOK",
+                'empresa' => env('STP_COMPANY'),
                 'fechaOperacion' => "",
                 'folioOrigen' => "",
                 'claveRastreo' => $claveRastreo,
                 'institucionOperante' => "90646",
-                'monto' => "10.00",
+                'monto' => ModelUtility::numberFormat($request->input('amount')),
                 'tipoPago' => "1",
                 'tipoCuentaOrdenante' => "40",
                 'nombreOrdenante' => "WISPOK S.A. de C.V.",
-                'cuentaOrdenante' => "646180368700000009",
+                'cuentaOrdenante' => env('STP_ORDERING_ACCOUNT'),
                 'rfcCurpOrdenante' => "DOAL010304XZ6",
                 'tipoCuentaBeneficiario' => "40",
                 'nombreBeneficiario' => "S.A. de C.V.",
@@ -128,14 +131,14 @@ class STPTestController extends Controller
     /**
      * @return JsonResponse
      */
-    public function conciliation(): JsonResponse
+    public function conciliation(ConciliationRequest $request): JsonResponse
     {
         try
         {
             $data = [
-                'empresa' => "WISPOK",
+                'empresa' => env('STP_COMPANY'),
                 'tipoOrden' => "E",
-                'fechaOperacion' => ""
+                'fechaOperacion' => ModelUtility::nullSafeForString($request->input('operation_date'))
             ];
             $data2 = $data;
             $data2['page'] = 0;

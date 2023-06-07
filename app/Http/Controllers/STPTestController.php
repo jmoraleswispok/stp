@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\STPTest\CheckAccountBalanceRequest;
 use App\Http\Requests\STPTest\ConciliationRequest;
+use App\Http\Requests\STPTest\OrderStatusChangesRequest;
 use App\Http\Requests\STPTest\RegisterOrderRequest;
+use App\Interfaces\HttpCodeInterface;
+use App\Models\Order;
 use App\Utilities\ModelUtility;
 use App\Utilities\STPUtility;
 use Carbon\Carbon;
@@ -120,9 +123,15 @@ class STPTestController extends Controller
                 "tipoPago" => $data['tipoPago'],
                 "firma" => $data['firma']
             ];
-            //dd(json_encode($data), $firma);
             $responseStp = Http::baseUrl(env('STP_SPEI_URL'))->asJson()->withBody(json_encode($data2))->put("ordenPago/registra");
-            return $this->successResponse($responseStp->json());
+            $response = $responseStp->json();
+            if (!empty($response['resultado']['descripcionError'])) {
+                throw new Exception($response['resultado']['descripcionError'], HttpCodeInterface::BAD_REQUEST);
+            }
+            Order::query()->create([
+                'id_ef' => $response['resultado']['id']
+            ]);
+            return $this->successResponse($response);
         } catch (Exception $e) {
             return $this->errorResponse($e->getMessage(), $e->getCode());
         }
@@ -148,6 +157,20 @@ class STPTestController extends Controller
         } catch (Exception $e) {
             return $this->errorResponse($e->getMessage(), $e->getCode());
         }
+    }
+
+    public function orderStatusChanges(OrderStatusChangesRequest $request)
+    {
+        $order = Order::query()->where('id_ef', $request->input('id'))->first();
+        $order?->update([
+            'folio_origin' => $request->input('folioOrigen'),
+            'status' => $request->input('estado'),
+            'cause_return' => $request->input('causaDevolucion'),
+            'ts_liquidation' => $request->input('tsLiquidacion')
+        ]);
+        return response()->json([
+            'mensaje' => "recibido"
+        ]);
     }
 
 }

@@ -20,5 +20,6 @@ require (__DIR__ . '/api/authenticated.php');
 
 Route::post('test', STPTestController::class);
 Route::post('check-account-balance', [STPTestController::class, 'checkAccountBalance']);
-Route::post('register-order', [STPTestController::class, 'registerOrder']);
+Route::post('order', [STPTestController::class, 'registerOrder']);
+Route::patch('order/status-changes', [STPTestController::class, 'orderStatusChanges']);
 Route::post('conciliation', [STPTestController::class, 'conciliation']);

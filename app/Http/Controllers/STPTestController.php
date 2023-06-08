@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\STPTest\CheckAccountBalanceRequest;
 use App\Http\Requests\STPTest\ConciliationRequest;
+use App\Http\Requests\STPTest\OrderReceivedRequest;
 use App\Http\Requests\STPTest\OrderStatusChangesRequest;
 use App\Http\Requests\STPTest\RegisterOrderRequest;
 use App\Interfaces\HttpCodeInterface;
@@ -171,6 +172,11 @@ class STPTestController extends Controller
         return response()->json([
             'mensaje' => "recibido"
         ]);
+    }
+
+    public function orderReceived(OrderReceivedRequest $request)
+    {
+
     }
 
 }

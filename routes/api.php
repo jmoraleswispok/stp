@@ -22,4 +22,5 @@ Route::post('test', STPTestController::class);
 Route::post('check-account-balance', [STPTestController::class, 'checkAccountBalance']);
 Route::post('order', [STPTestController::class, 'registerOrder']);
 Route::patch('order/status-changes', [STPTestController::class, 'orderStatusChanges']);
+Route::post('order/received', [STPTestController::class, 'orderReceived']);
 Route::post('conciliation', [STPTestController::class, 'conciliation']);

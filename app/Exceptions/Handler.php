@@ -123,14 +123,18 @@ class Handler extends ExceptionHandler implements HttpCodeInterface
      */
     protected function convertValidationExceptionToResponse(ValidationException $e, $request): JsonResponse|RedirectResponse
     {
-        $errors = $e->validator->errors()->getMessages();
-        if ($this->isFrontend($request)) {
-            return $request->ajax() ? response()->json($errors, self::UNPROCESSABLE_ENTITY) : redirect()
-                ->back()
-                ->withInput($request->input())
-                ->withErrors($errors);
-        }
-        return $this->errorResponse($errors, self::UNPROCESSABLE_ENTITY);
+//        $errors = $e->validator->errors()->getMessages();
+//        if ($this->isFrontend($request)) {
+//            return $request->ajax() ? response()->json($errors, self::UNPROCESSABLE_ENTITY) : redirect()
+//                ->back()
+//                ->withInput($request->input())
+//                ->withErrors($errors);
+//        }
+//        return $this->errorResponse($errors, self::UNPROCESSABLE_ENTITY);
+        return response()->json([
+            'mensaje' => "devolver",
+            'id' => 14
+        ],HttpCodeInterface::BAD_REQUEST);
     }
 
     private function isFrontend($request): bool

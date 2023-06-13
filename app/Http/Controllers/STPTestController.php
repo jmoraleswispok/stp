@@ -59,6 +59,7 @@ class STPTestController extends Controller
     }
 
     /**
+     * @param RegisterOrderRequest $request
      * @return JsonResponse
      */
     public function registerOrder(RegisterOrderRequest $request): JsonResponse
@@ -139,6 +140,7 @@ class STPTestController extends Controller
     }
 
     /**
+     * @param ConciliationRequest $request
      * @return JsonResponse
      */
     public function conciliation(ConciliationRequest $request): JsonResponse
@@ -176,7 +178,15 @@ class STPTestController extends Controller
 
     public function orderReceived(OrderReceivedRequest $request)
     {
-
+        try
+        {
+            return response()->json([
+                'mensaje' => "confirmar"
+            ]);
+        } catch (Exception $e) {
+            $message = json_decode($e->getMessage(), true);
+            return response()->json($message,HttpCodeInterface::BAD_REQUEST);
+        }
     }
 
 }

@@ -9,6 +9,7 @@ use App\Http\Requests\STPTest\OrderStatusChangesRequest;
 use App\Http\Requests\STPTest\RegisterOrderRequest;
 use App\Interfaces\HttpCodeInterface;
 use App\Models\Order;
+use App\Models\User;
 use App\Utilities\ModelUtility;
 use App\Utilities\STPUtility;
 use Carbon\Carbon;
@@ -180,6 +181,15 @@ class STPTestController extends Controller
     {
         try
         {
+            $user = User::query()->where('stp_account', $request->input('cuentaBeneficiario'))->firstOr(function () {
+                throw new Exception(json_encode([
+                    'id' => 1,
+                    'mensaje' => "Cuenta inexistente"
+                ]));
+            });
+            $user->orderReceiveds()->create([
+                'request' => json_encode($request->all())
+            ]);
             return response()->json([
                 'mensaje' => "confirmar"
             ]);

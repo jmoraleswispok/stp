@@ -19,6 +19,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
+            $table->string('stp_account')->nullable();
             $table->tinyInteger('status')->default(ModelInterface::ACTIVE)->comment('0 => Inactivo, 1 => Activo');
             $table->timestamps();
             $table->softDeletes();

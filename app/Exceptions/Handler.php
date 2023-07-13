@@ -123,7 +123,7 @@ class Handler extends ExceptionHandler implements HttpCodeInterface
      */
     protected function convertValidationExceptionToResponse(ValidationException $e, $request): JsonResponse|RedirectResponse
     {
-//        $errors = $e->validator->errors()->getMessages();
+
 //        if ($this->isFrontend($request)) {
 //            return $request->ajax() ? response()->json($errors, self::UNPROCESSABLE_ENTITY) : redirect()
 //                ->back()
@@ -131,10 +131,17 @@ class Handler extends ExceptionHandler implements HttpCodeInterface
 //                ->withErrors($errors);
 //        }
 //        return $this->errorResponse($errors, self::UNPROCESSABLE_ENTITY);
-        return response()->json([
-            'mensaje' => "devolver",
-            'id' => 14
-        ],HttpCodeInterface::BAD_REQUEST);
+        if ($request->path() === 'api/order/received') {
+            return response()->json([
+                'mensaje' => "devolver",
+                'desc' => 'Falta información mandatorio para completar el pago',
+                'id' => 14
+            ],HttpCodeInterface::BAD_REQUEST);
+        } else {
+            $errors = $e->validator->errors()->getMessages();
+            return $this->errorResponse($errors, self::UNPROCESSABLE_ENTITY);
+        }
+
     }
 
     private function isFrontend($request): bool

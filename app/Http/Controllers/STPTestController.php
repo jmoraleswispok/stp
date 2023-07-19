@@ -69,6 +69,7 @@ class STPTestController extends Controller
         {
             $day = Carbon::now();
             $claveRastreo = "{$this->randomNumber(5)}WISPOK{$day->format('Ymd')}{$day->timestamp}";
+            $cuentaBeneficiario = $request->has('cuentaBeneficiario') ? $request->input('cuentaBeneficiario') : '646180110400000007';
             $data = [
                 'institucionContraparte' => "90646",
                 'empresa' => env('STP_COMPANY'),
@@ -84,7 +85,7 @@ class STPTestController extends Controller
                 'rfcCurpOrdenante' => "DOAL010304XZ6",
                 'tipoCuentaBeneficiario' => "40",
                 'nombreBeneficiario' => "S.A. de C.V.",
-                'cuentaBeneficiario' => "646180110400000007",
+                'cuentaBeneficiario' => $cuentaBeneficiario,
                 'rfcCurpBeneficiario' => "PXBK451111RO2",
                 'emailBeneficiario' => "",
                 'tipoCuentaBeneficiario2' => "",
@@ -190,6 +191,12 @@ class STPTestController extends Controller
             $user->orderReceiveds()->create([
                 'request' => json_encode($request->all())
             ]);
+            if ($request->input('cuentaBeneficiario') == '646180368700000025') {
+                throw new Exception(json_encode([
+                    'id' => 2,
+                    'mensaje' => "Cuenta bloqueada"
+                ]));
+            }
             return response()->json([
                 'mensaje' => "confirmar"
             ]);

@@ -27,7 +27,7 @@ class OrderReceivedRequest extends FormRequest
             'id' => [
                 'required',
                 'numeric',
-                'digits_between:1,10'
+                //'digits_between:1,10'
             ],
             'fechaOperacion' => 'required|numeric|date|date_format:Ymd',
             'institucionOrdenante' => 'required',

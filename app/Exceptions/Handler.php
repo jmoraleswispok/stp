@@ -14,6 +14,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Session\TokenMismatchException;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Laravel\Passport\Exceptions\OAuthServerException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -132,6 +133,8 @@ class Handler extends ExceptionHandler implements HttpCodeInterface
 //        }
 //        return $this->errorResponse($errors, self::UNPROCESSABLE_ENTITY);
         if ($request->path() === 'api/order/received') {
+            $errors = $e->validator->errors()->getMessages();
+            Log::error(json_encode($errors));
             return response()->json([
                 'mensaje' => "devolver",
                 'desc' => 'Falta información mandatorio para completar el pago',

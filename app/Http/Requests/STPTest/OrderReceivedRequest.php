@@ -30,8 +30,8 @@ class OrderReceivedRequest extends FormRequest
                 'digits_between:1,10'
             ],
             'fechaOperacion' => 'required|numeric|date|date_format:Ymd',
-            'institucionOrdenante' => 'required|numeric',
-            'institucionBeneficiaria' => 'required|numeric',
+            'institucionOrdenante' => 'required',
+            'institucionBeneficiaria' => 'required',
             'claveRastreo' => 'required|string',
             'monto' => [
                 'required',
@@ -43,17 +43,17 @@ class OrderReceivedRequest extends FormRequest
             //'cuentaOrdenante' => 'sometimes|string',
             //'rfcCurpOrdenante' => 'sometimes|string',
             'nombreBeneficiario' => 'required|string',
-            'tipoCuentaBeneficiario' => 'required|numeric',
+            'tipoCuentaBeneficiario' => 'required',
             'cuentaBeneficiario' => 'required|string',
             //'tipoCuentaBeneficiario2' => 'sometimes|numeric',
             //'cuentaBeneficiario2' => 'sometimes|string',
-            'rfcCurpBeneficiario' => 'required|string',
+            'rfcCurpBeneficiario' => 'required',
             'conceptoPago' => 'required|string',
-            'referenciaNumerica' => 'required|numeric',
+            'referenciaNumerica' => 'required',
             'empresa' => 'required|string',
             'tipoPago' => 'required|numeric',
             'tsLiquidacion' => 'required|string',
-            'folioCodi' => 'sometimes|string',
+            //'folioCodi' => 'sometimes',
         ];
     }
 }

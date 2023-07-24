@@ -17,6 +17,7 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 
 class STPTestController extends Controller
@@ -26,6 +27,7 @@ class STPTestController extends Controller
      */
     public function __invoke(Request $request)
     {
+        Log::info(json_encode($request->all()));
         try
         {
             $data = [
@@ -35,6 +37,7 @@ class STPTestController extends Controller
             ];
             return $this->successResponse(STPUtility::sign($data));
         } catch (Exception $e) {
+            Log::error(json_encode($e->getMessage()));
             return $this->errorResponse($e->getMessage(), $e->getCode());
         }
     }
@@ -44,6 +47,7 @@ class STPTestController extends Controller
      */
     public function checkAccountBalance(CheckAccountBalanceRequest $request): JsonResponse
     {
+        Log::info(json_encode($request->all()));
         try
         {
             $data = [
@@ -55,6 +59,7 @@ class STPTestController extends Controller
             $responseStp = Http::baseUrl(env('STP_URL'))->post("consultaSaldoCuenta", $data);
             return $this->successResponse($responseStp->json());
         } catch (Exception $e) {
+            Log::error(json_encode($e->getMessage()));
             return $this->errorResponse($e->getMessage(), $e->getCode());
         }
     }
@@ -65,6 +70,7 @@ class STPTestController extends Controller
      */
     public function registerOrder(RegisterOrderRequest $request): JsonResponse
     {
+        Log::info(json_encode($request->all()));
         try
         {
             $day = Carbon::now();
@@ -137,6 +143,7 @@ class STPTestController extends Controller
             ]);
             return $this->successResponse($response);
         } catch (Exception $e) {
+            Log::error(json_encode($e->getMessage()));
             return $this->errorResponse($e->getMessage(), $e->getCode());
         }
     }
@@ -147,6 +154,7 @@ class STPTestController extends Controller
      */
     public function conciliation(ConciliationRequest $request): JsonResponse
     {
+        Log::info(json_encode($request->all()));
         try
         {
             $data = [
@@ -160,12 +168,14 @@ class STPTestController extends Controller
             $responseStp = Http::baseUrl(env('STP_URL'))->post("V2/conciliacion", $data2);
             return $this->successResponse($responseStp->json());
         } catch (Exception $e) {
+            Log::error(json_encode($e->getMessage()));
             return $this->errorResponse($e->getMessage(), $e->getCode());
         }
     }
 
     public function orderStatusChanges(OrderStatusChangesRequest $request)
     {
+        Log::info(json_encode($request->all()));
         $order = Order::query()->where('id_ef', $request->input('id'))->first();
         $order?->update([
             'folio_origin' => $request->input('folioOrigen'),
@@ -180,6 +190,7 @@ class STPTestController extends Controller
 
     public function orderReceived(OrderReceivedRequest $request)
     {
+        Log::info(json_encode($request->all()));
         try
         {
             $user = User::query()->where('stp_account', $request->input('cuentaBeneficiario'))->firstOr(function () {
@@ -202,6 +213,7 @@ class STPTestController extends Controller
             ]);
         } catch (Exception $e) {
             $message = json_decode($e->getMessage(), true);
+            Log::error(json_encode($message));
             return response()->json($message,HttpCodeInterface::BAD_REQUEST);
         }
     }

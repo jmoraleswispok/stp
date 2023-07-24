@@ -26,7 +26,7 @@ class OrderStatusChangesRequest extends FormRequest
             'empresa' => "required",
             'folioOrigen' => "sometime",
             'estado' => "required",
-            'causaDevolucion' => "required",
+            //'causaDevolucion' => "required",
             'tsLiquidacion' => "required",
         ];
     }

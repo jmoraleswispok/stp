@@ -24,7 +24,7 @@ class RegisterOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'amount' => ['required','numeric','min:1','max:999999999999.99', new MaxDecimals(2)]
+            'amount' => ['required','numeric','min:0.01','max:999999999999.99', new MaxDecimals(2)]
         ];
     }
 }

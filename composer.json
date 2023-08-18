@@ -10,7 +10,8 @@
         "laravel/framework": "^10.8",
         "laravel/passport": "^11.8",
         "laravel/tinker": "^2.8",
-        "ext-bcmath": "*"
+        "ext-bcmath": "*",
+      "ext-openssl": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

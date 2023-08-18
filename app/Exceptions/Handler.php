@@ -14,6 +14,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Session\TokenMismatchException;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Laravel\Passport\Exceptions\OAuthServerException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -123,14 +124,27 @@ class Handler extends ExceptionHandler implements HttpCodeInterface
      */
     protected function convertValidationExceptionToResponse(ValidationException $e, $request): JsonResponse|RedirectResponse
     {
-        $errors = $e->validator->errors()->getMessages();
-        if ($this->isFrontend($request)) {
-            return $request->ajax() ? response()->json($errors, self::UNPROCESSABLE_ENTITY) : redirect()
-                ->back()
-                ->withInput($request->input())
-                ->withErrors($errors);
+
+//        if ($this->isFrontend($request)) {
+//            return $request->ajax() ? response()->json($errors, self::UNPROCESSABLE_ENTITY) : redirect()
+//                ->back()
+//                ->withInput($request->input())
+//                ->withErrors($errors);
+//        }
+//        return $this->errorResponse($errors, self::UNPROCESSABLE_ENTITY);
+        if ($request->path() === 'api/order/received') {
+            $errors = $e->validator->errors()->getMessages();
+            Log::error(json_encode($errors));
+            return response()->json([
+                'mensaje' => "devolver",
+                'desc' => 'Falta información mandatorio para completar el pago',
+                'id' => 14
+            ],HttpCodeInterface::BAD_REQUEST);
+        } else {
+            $errors = $e->validator->errors()->getMessages();
+            return $this->errorResponse($errors, self::UNPROCESSABLE_ENTITY);
         }
-        return $this->errorResponse($errors, self::UNPROCESSABLE_ENTITY);
+
     }
 
     private function isFrontend($request): bool

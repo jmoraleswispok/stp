@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Firestore\SiapaFirestore;
 use App\Http\Requests\STPTest\CheckAccountBalanceRequest;
 use App\Http\Requests\STPTest\ConciliationRequest;
 use App\Http\Requests\STPTest\OrderReceivedRequest;
@@ -9,6 +10,7 @@ use App\Http\Requests\STPTest\OrderStatusChangesRequest;
 use App\Http\Requests\STPTest\RegisterOrderRequest;
 use App\Interfaces\HttpCodeInterface;
 use App\Models\Order;
+use App\Models\Siapa\PaymenthStp;
 use App\Models\User;
 use App\Utilities\ModelUtility;
 use App\Utilities\STPUtility;
@@ -193,7 +195,8 @@ class STPTestController extends Controller
         Log::info(json_encode($request->all()));
         try
         {
-            $user = User::query()->where('stp_account', $request->input('cuentaBeneficiario'))->firstOr(function () {
+            $beneficiaryAccount = $request->input('cuentaBeneficiario');
+            $user = User::query()->where('stp_account', $beneficiaryAccount)->firstOr(function () {
                 throw new Exception(json_encode([
                     'id' => 1,
                     'mensaje' => "Cuenta inexistente"
@@ -202,12 +205,41 @@ class STPTestController extends Controller
             $user->orderReceiveds()->create([
                 'request' => json_encode($request->all())
             ]);
-            if ($request->input('cuentaBeneficiario') == '646180368700000025') {
+            if ($beneficiaryAccount !== env('STP_ACCOUNT_ACCEPTED')) {
                 throw new Exception(json_encode([
                     'id' => 2,
-                    'mensaje' => "Cuenta bloqueada"
+                    'mensaje' => "Cuenta no autorizada."
                 ]));
             }
+            $siapaSTP = PaymenthStp::query()->with(['paymenth' => function($query) {
+                return $query->with(['siapaUserInfo' => function($query) {
+                    return $query->with(['siapaUser']);
+                }]);
+            }])->where('reference', $request->input('referenciaNumerica'))->firstOr(function () {
+                throw new Exception(json_encode([
+                    'id' => 1,
+                    'mensaje' => "Referencia Numerica inexistente"
+                ]));
+            });
+            if ($siapaSTP->paymenth->status !== 1) {
+                throw new Exception(json_encode([
+                    'id' => 2,
+                    'mensaje' => "El pago ya no se encuentra pendiente."
+                ]));
+            }
+            $amount = floatval($request->input('monto'));
+            if (floatval($siapaSTP->paymenth->paymenth_a) !== $amount) {
+                throw new Exception(json_encode([
+                    'id' => 2,
+                    'mensaje' => "Monto no autorizado."
+                ]));
+            }
+            $siapaSTP->paymenth->update([
+                'paymenth_at' => Carbon::now(),
+                'status' => 2
+            ]);
+            $firestore = new SiapaFirestore('SIAPA');
+            $firestore->set($siapaSTP->paymenth->siapaUserInfo->siapaUser->account_contract, $siapaSTP->paymenth->uuid,2, $siapaSTP->full_name, $amount);
             return response()->json([
                 'mensaje' => "confirmar"
             ]);

@@ -181,6 +181,7 @@ class STPTestController extends Controller
             $data2 = $data;
             $data2['page'] = 0;
             $data2['firma'] = STPUtility::sign($data);
+            Log::info(json_encode($data2));
             $responseStp = Http::baseUrl(env('STP_URL'))->post("V2/conciliacion", $data2);
             return $this->successResponse($responseStp->json());
         } catch (Exception $e) {

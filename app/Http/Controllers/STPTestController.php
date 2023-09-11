@@ -22,6 +22,9 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 
+ini_set('memory_limit', '50G');
+
+
 class STPTestController extends Controller
 {
     /**
@@ -76,7 +79,7 @@ class STPTestController extends Controller
         try
         {
             $day = Carbon::now();
-            $claveRastreo = "{$this->randomNumber(5)}WISPOK{$day->format('Ymd')}{$day->timestamp}";
+            $claveRastreo = "{$this->randomNumber(2)}WISPOK{$day->format('Ymd')}{$day->timestamp}{$day->milliseconds}";
             $cuentaBeneficiario = $request->has('cuentaBeneficiario') ? $request->input('cuentaBeneficiario') : '646180110400000007';
             $data = [
                 'institucionContraparte' => "90646",
@@ -156,6 +159,17 @@ class STPTestController extends Controller
      */
     public function conciliation(ConciliationRequest $request): JsonResponse
     {
+        /*$now  = Carbon::now();
+        dd_json("{$now->timestamp}{$now->milliseconds}");
+        $cuentas = [];
+        for ($i = 0; $i <= 100;$i++)
+        {
+            $account = STPUtility::generateAccountNumber2($i);
+            //if (substr($account, -1) == 0) {
+                $cuentas[] = $account;
+            //}
+        }
+        dd_json($cuentas);*/
         Log::info(json_encode($request->all()));
         try
         {

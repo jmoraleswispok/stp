@@ -25,4 +25,10 @@ class Order extends Model
         'cause_return',
         'ts_liquidation'
     ];
+
+    public function statuses()
+    {
+        return $this->hasMany(OrderStatus::class);
+    }
+
 }

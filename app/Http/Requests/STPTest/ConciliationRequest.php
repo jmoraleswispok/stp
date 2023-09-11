@@ -23,7 +23,19 @@ class ConciliationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'operation_date' => 'sometimes|string|date|date_format:Ymd'
+            'operation_date' => 'sometimes|string|date|date_format:Ymd',
+            'order_type' => 'required|string|in:E,R'
         ];
     }
+
+    /**
+     * @return string[]
+     */
+    public function messages(): array
+    {
+        return [
+            'order_type.in' => 'El valor seleccionado para :attribute no es válido. Los valores permitidos son: E y R.',
+        ];
+    }
+
 }

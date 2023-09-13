@@ -18,6 +18,12 @@ class ChangeStatusController extends Controller
     {
         Log::info(json_encode($request->all()));
         $order = Order::query()->where('id_ef', $request->input('id'))->first();
+        $order?->statuses()->create([
+            'folio_origin' => $request->input('folioOrigen'),
+            'status' => $request->input('estado'),
+            'cause_return' => $request->input('causaDevolucion'),
+            'ts_liquidation' => $request->input('tsLiquidacion')
+        ]);
         $order?->update([
             'folio_origin' => $request->input('folioOrigen'),
             'status' => $request->input('estado'),

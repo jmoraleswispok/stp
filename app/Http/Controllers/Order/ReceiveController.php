@@ -12,6 +12,7 @@ use App\Models\Siapa\PaymenthStp;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class ReceiveController extends Controller
@@ -63,11 +64,12 @@ class ReceiveController extends Controller
                     'mensaje' => $message
                 ]));
             }
+            $reference = $request->input('referenciaNumerica');
             $siapaSTP = PaymenthStp::query()->with(['paymenth' => function($query) {
                 return $query->with(['siapaUserInfo' => function($query) {
                     return $query->with(['siapaUser']);
                 }]);
-            }])->where('reference', $request->input('referenciaNumerica'))->firstOr(function () use ($retry) {
+            }])->where('reference', $reference)->firstOr(function () use ($retry) {
                 $message = "Referencia numérica inexistente.";
                 $retry->update([
                     'reason_for_rejection' => $message
@@ -103,10 +105,12 @@ class ReceiveController extends Controller
                 'status' => 2
             ]);
             $firestore = new SiapaFirestore('SIAPA');
-            $firestore->set($siapaSTP->paymenth->siapaUserInfo->siapaUser->account_contract, $siapaSTP->paymenth->uuid,2, $siapaSTP->full_name, $amount);
+            $account = $siapaSTP->paymenth->siapaUserInfo->siapaUser->account_contract;
+            $firestore->set($account, $siapaSTP->paymenth->uuid,2, $siapaSTP->full_name, $amount);
             $orderReceived->update([
                 'approved' => 1
             ]);
+            $this->affectBalance($account, $amount, $reference);
             return response()->json([
                 'mensaje' => "confirmar"
             ]);
@@ -116,4 +120,24 @@ class ReceiveController extends Controller
             return response()->json($message,HttpCodeInterface::BAD_REQUEST);
         }
     }
+
+    private function affectBalance($account, $import, $reference)
+    {
+        try
+        {
+            $formData = [
+                'cuenta' => $account,
+                'importe' => $import,
+                'autoriza' => $reference
+            ];
+            $response = Http::baseUrl('192.168.100.10')->post('api/siapa/payment', $formData);
+            Log::info(json_encode([
+                'data' => $response->json()
+            ]));
+        }catch (Exception $e) {
+            Log::error("affectBalance");
+            Log::error($e->getMessage());
+        }
+    }
+
 }

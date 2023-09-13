@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Order;
 
+use App\Models\OrderReceived;
 use Exception;
 use App\Firestore\SiapaFirestore;
 use App\Http\Controllers\Controller;
@@ -24,45 +25,77 @@ class ReceiveController extends Controller
         Log::info(json_encode($request->all()));
         try
         {
-            $beneficiaryAccount = $request->input('cuentaBeneficiario');
-            $user = User::query()->where('stp_account', $beneficiaryAccount)->firstOr(function () {
-                throw new Exception(json_encode([
-                    'id' => 1,
-                    'mensaje' => "Cuenta inexistente"
-                ]));
-            });
-
-            $user->orderReceiveds()->create([
+            $orderReceived = OrderReceived::query()->where('stp_id', $request->input('id'))->first();
+            if ($orderReceived) {
+                $orderReceived->update([
+                    'retries' => intval($orderReceived->retries) + 1
+                ]);
+            } else {
+                $orderReceived = OrderReceived::query()->create([
+                    'stp_id' => $request->input('id'),
+                    'request' => json_encode($request->all())
+                ]);
+            }
+            $retry = $orderReceived->retries()->create([
                 'request' => json_encode($request->all())
             ]);
-
+            $beneficiaryAccount = $request->input('cuentaBeneficiario');
+            $user = User::query()->where('stp_account', $beneficiaryAccount)->firstOr(function () use ($retry) {
+                $message = "Cuenta inexistente.";
+                $retry->update([
+                    'reason_for_rejection' => $message
+                ]);
+                throw new Exception(json_encode([
+                    'id' => 1,
+                    'mensaje' => $message
+                ]));
+            });
+            $orderReceived->update([
+                'user_id' => $user->id
+            ]);
             if ($beneficiaryAccount !== env('STP_ACCOUNT_ACCEPTED')) {
+                $message = "Cuenta no autorizada.";
+                $retry->update([
+                    'reason_for_rejection' => $message
+                ]);
                 throw new Exception(json_encode([
                     'id' => 2,
-                    'mensaje' => "Cuenta no autorizada."
+                    'mensaje' => $message
                 ]));
             }
             $siapaSTP = PaymenthStp::query()->with(['paymenth' => function($query) {
                 return $query->with(['siapaUserInfo' => function($query) {
                     return $query->with(['siapaUser']);
                 }]);
-            }])->where('reference', $request->input('referenciaNumerica'))->firstOr(function () {
+            }])->where('reference', $request->input('referenciaNumerica'))->firstOr(function () use ($retry) {
+                $message = "Referencia numérica inexistente.";
+                $retry->update([
+                    'reason_for_rejection' => $message
+                ]);
                 throw new Exception(json_encode([
                     'id' => 1,
-                    'mensaje' => "Referencia Numerica inexistente"
+                    'mensaje' => $message
                 ]));
             });
             if ($siapaSTP->paymenth->status !== 1) {
+                $message = "El pago ya no se encuentra pendiente.";
+                $retry->update([
+                    'reason_for_rejection' => $message
+                ]);
                 throw new Exception(json_encode([
                     'id' => 2,
-                    'mensaje' => "El pago ya no se encuentra pendiente."
+                    'mensaje' => $message
                 ]));
             }
             $amount = floatval($request->input('monto'));
             if (floatval($siapaSTP->paymenth->paymenth_a) !== $amount) {
+                $message = "Monto no autorizado.";
+                $retry->update([
+                    'reason_for_rejection' => $message
+                ]);
                 throw new Exception(json_encode([
                     'id' => 2,
-                    'mensaje' => "Monto no autorizado."
+                    'mensaje' => $message
                 ]));
             }
             $siapaSTP->paymenth->update([
@@ -71,6 +104,9 @@ class ReceiveController extends Controller
             ]);
             $firestore = new SiapaFirestore('SIAPA');
             $firestore->set($siapaSTP->paymenth->siapaUserInfo->siapaUser->account_contract, $siapaSTP->paymenth->uuid,2, $siapaSTP->full_name, $amount);
+            $orderReceived->update([
+                'approved' => 1
+            ]);
             return response()->json([
                 'mensaje' => "confirmar"
             ]);

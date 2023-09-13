@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('order_receiveds', function (Blueprint $table) {
+        Schema::create('order_received_retries', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->nullable()->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('order_received_id')->constrained()->cascadeOnUpdate();
             $table->longText('request');
+            $table->longText('reason_for_rejection')->nullable();
             $table->timestamps();
         });
     }
@@ -24,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('order_receiveds');
+        Schema::dropIfExists('order_received_retries');
     }
 };

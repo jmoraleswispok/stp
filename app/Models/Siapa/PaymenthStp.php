@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PaymenthStp extends Model
 {
+    protected $connection = 'siapa';
     protected $fillable = [
         'data'
     ];

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class SiapaUserInfo extends Model
 {
+    protected $connection = 'siapa';
     use HasFactory;
 
     public function siapaUser(): BelongsTo{

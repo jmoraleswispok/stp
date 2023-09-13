@@ -20,6 +20,7 @@ class ReceiveController extends Controller
      */
     public function __invoke(ReceiveRequest $request)
     {
+        Log::info("ReceiveController -> request");
         Log::info(json_encode($request->all()));
         try
         {
@@ -30,9 +31,11 @@ class ReceiveController extends Controller
                     'mensaje' => "Cuenta inexistente"
                 ]));
             });
+
             $user->orderReceiveds()->create([
                 'request' => json_encode($request->all())
             ]);
+
             if ($beneficiaryAccount !== env('STP_ACCOUNT_ACCEPTED')) {
                 throw new Exception(json_encode([
                     'id' => 2,
@@ -73,7 +76,7 @@ class ReceiveController extends Controller
             ]);
         } catch (Exception $e) {
             $message = json_decode($e->getMessage(), true);
-            Log::error(json_encode($message));
+            Log::error(json_encode($e->getMessage()));
             return response()->json($message,HttpCodeInterface::BAD_REQUEST);
         }
     }

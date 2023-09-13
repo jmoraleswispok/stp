@@ -2,15 +2,15 @@
 
 namespace App\Models\Siapa;
 
-use App\Models\Wispok\Application\Payment as WispokPayment;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+
 
 class Paymenth extends Model
 {
+    protected $connection = 'siapa';
     use HasFactory;
 
     const PAID = 2;

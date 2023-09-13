@@ -11,10 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('order_receiveds', function (Blueprint $table) {
+        Schema::create('logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->nullable()->constrained()->cascadeOnUpdate()->cascadeOnDelete();
-            $table->longText('request');
+            $table->string('title');
+            $table->string('path');
+            $table->string('class');
+            $table->tinyInteger('error')->default(1);
+            $table->longText('message');
             $table->timestamps();
         });
     }
@@ -24,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('order_receiveds');
+        Schema::dropIfExists('logs');
     }
 };

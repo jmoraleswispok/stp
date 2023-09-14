@@ -116,7 +116,16 @@ class ReceiveController extends Controller
             ]);
         } catch (Exception $e) {
             $message = json_decode($e->getMessage(), true);
-            Log::error(json_encode($e->getMessage()));
+            if (empty($message)) {
+                Log::error($e->getMessage());
+                $message = [
+                    'id' => 15,
+                    'mensaje' => "No fue posible aceptar el movimiento"
+                ];
+            } else {
+                Log::error(json_encode($e->getMessage()));
+            }
+
             return response()->json($message,HttpCodeInterface::BAD_REQUEST);
         }
     }
@@ -130,6 +139,9 @@ class ReceiveController extends Controller
                 'importe' => $import,
                 'autoriza' => $reference
             ];
+            Log::info(json_encode([
+                'FormData' => $formData
+            ]));
             $response = Http::baseUrl('192.168.100.10')->post('api/siapa/payment', $formData);
             Log::info(json_encode([
                 'data' => $response->json()

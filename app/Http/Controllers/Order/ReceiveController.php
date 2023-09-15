@@ -107,7 +107,8 @@ class ReceiveController extends Controller
                     'claveRastreo' => request()->input('claveRastreo'),
                     'tsLiquidacion' => request()->input('tsLiquidacion'),
                     'cuentaOrdenante' => request()->input('cuentaOrdenante'),
-                    'nombreOrdenante' => request()->input('nombreOrdenante')
+                    'nombreOrdenante' => request()->input('nombreOrdenante'),
+                    'conceptoPago' => request()->input('conceptoPago')
                 ]),
                 'status' => 2
             ]);

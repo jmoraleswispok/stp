@@ -102,6 +102,13 @@ class ReceiveController extends Controller
             }
             $siapaSTP->paymenth->update([
                 'paymenth_at' => Carbon::now(),
+                'stp_id' => request()->input('id'),
+                'data' => json_encode([
+                    'claveRastreo' => request()->input('claveRastreo'),
+                    'tsLiquidacion' => request()->input('tsLiquidacion'),
+                    'cuentaOrdenante' => request()->input('cuentaOrdenante'),
+                    'nombreOrdenante' => request()->input('nombreOrdenante')
+                ]),
                 'status' => 2
             ]);
             $firestore = new SiapaFirestore('SIAPA');

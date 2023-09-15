@@ -9,6 +9,7 @@ class PaymenthStp extends Model
 {
     protected $connection = 'siapa';
     protected $fillable = [
+        'stp_id',
         'data'
     ];
 

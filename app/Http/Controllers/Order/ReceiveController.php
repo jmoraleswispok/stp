@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Order;
 
 use App\Models\OrderReceived;
+use App\Utilities\ModelUtility;
 use Exception;
 use App\Firestore\SiapaFirestore;
 use App\Http\Controllers\Controller;
@@ -90,7 +91,9 @@ class ReceiveController extends Controller
                 ]));
             }
             $amount = floatval($request->input('monto'));
-            if (floatval($siapaSTP->paymenth->paymenth_a) !== $amount) {
+            $siapaAmount = floatval($siapaSTP->paymenth->paymenth_a) + floatval(ModelUtility::nullSafeForNumeric($siapaSTP->paymenth));
+
+            if ($siapaAmount !== $amount) {
                 $message = "Monto no autorizado.";
                 $retry->update([
                     'reason_for_rejection' => $message

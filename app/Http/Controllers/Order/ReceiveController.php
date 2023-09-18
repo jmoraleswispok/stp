@@ -104,7 +104,11 @@ class ReceiveController extends Controller
                 'paymenth_at' => Carbon::now(),
                 'status' => 2
             ]);
-            $siapaSTP->update([
+            $firestore = new SiapaFirestore('SIAPA');
+            $account = $siapaSTP->paymenth->siapaUserInfo->siapaUser->account_contract;
+            $firestore->set($account, $siapaSTP->paymenth->uuid,2, $siapaSTP->full_name, $amount);
+            $orderReceived->update([
+                'approved' => 1,
                 'stp_id' => request()->input('id'),
                 'data' => json_encode([
                     'claveRastreo' => request()->input('claveRastreo'),
@@ -112,13 +116,7 @@ class ReceiveController extends Controller
                     'cuentaOrdenante' => request()->input('cuentaOrdenante'),
                     'nombreOrdenante' => request()->input('nombreOrdenante'),
                     'conceptoPago' => request()->input('conceptoPago')
-                ]),
-            ]);
-            $firestore = new SiapaFirestore('SIAPA');
-            $account = $siapaSTP->paymenth->siapaUserInfo->siapaUser->account_contract;
-            $firestore->set($account, $siapaSTP->paymenth->uuid,2, $siapaSTP->full_name, $amount);
-            $orderReceived->update([
-                'approved' => 1
+                ])
             ]);
             $this->affectBalance($account, $amount, $reference);
             return response()->json([

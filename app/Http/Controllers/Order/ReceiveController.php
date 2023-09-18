@@ -108,7 +108,9 @@ class ReceiveController extends Controller
             $account = $siapaSTP->paymenth->siapaUserInfo->siapaUser->account_contract;
             $firestore->set($account, $siapaSTP->paymenth->uuid,2, $siapaSTP->full_name, $amount);
             $orderReceived->update([
-                'approved' => 1,
+                'approved' => 1
+            ]);
+            $siapaSTP->update([
                 'stp_id' => request()->input('id'),
                 'data' => json_encode([
                     'claveRastreo' => request()->input('claveRastreo'),

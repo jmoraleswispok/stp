@@ -18,6 +18,15 @@ use Illuminate\Support\Facades\Log;
 
 class ReceiveController extends Controller
 {
+
+    protected $firestore = false;
+    protected $account = '';
+    protected $uuid = '';
+    protected $amount = '';
+    protected $fullName = '';
+    protected $siapaSTP = null;
+    protected $message = '';
+
     /**
      * Handle the incoming request.
      */
@@ -41,30 +50,7 @@ class ReceiveController extends Controller
             $retry = $orderReceived->retries()->create([
                 'request' => json_encode($request->all())
             ]);
-            $beneficiaryAccount = $request->input('cuentaBeneficiario');
-            $user = User::query()->where('stp_account', $beneficiaryAccount)->firstOr(function () use ($retry) {
-                $message = "Cuenta inexistente.";
-                $retry->update([
-                    'reason_for_rejection' => $message
-                ]);
-                throw new Exception(json_encode([
-                    'id' => 1,
-                    'mensaje' => $message
-                ]));
-            });
-            $orderReceived->update([
-                'user_id' => $user->id
-            ]);
-            if ($beneficiaryAccount !== env('STP_ACCOUNT_ACCEPTED')) {
-                $message = "Cuenta no autorizada.";
-                $retry->update([
-                    'reason_for_rejection' => $message
-                ]);
-                throw new Exception(json_encode([
-                    'id' => 2,
-                    'mensaje' => $message
-                ]));
-            }
+
             $reference = $request->input('referenciaNumerica');
             $siapaSTP = PaymenthStp::query()->with(['paymenth' => function($query) {
                 return $query->with(['siapaUserInfo' => function($query) {
@@ -80,36 +66,71 @@ class ReceiveController extends Controller
                     'mensaje' => $message
                 ]));
             });
-            if ($siapaSTP->paymenth->status !== 1) {
-                $message = "El pago ya no se encuentra pendiente.";
+            $this->siapaSTP = $siapaSTP;
+            $this->account = $siapaSTP->paymenth->siapaUserInfo->siapaUser->account_contract;
+            $this->uuid = $siapaSTP->paymenth->uuid;
+            $this->amount = floatval($request->input('monto'));
+            $this->fullName = $siapaSTP->full_name;
+            $this->firestore = true;
+
+            $beneficiaryAccount = $request->input('cuentaBeneficiario');
+            $user = User::query()->where('stp_account', $beneficiaryAccount)->firstOr(function () use ($retry) {
+                $this->message = "Cuenta inexistente.";
                 $retry->update([
-                    'reason_for_rejection' => $message
+                    'reason_for_rejection' => $this->message
+                ]);
+                throw new Exception(json_encode([
+                    'id' => 1,
+                    'mensaje' => $this->message
+                ]));
+            });
+            $orderReceived->update([
+                'user_id' => $user->id
+            ]);
+            if ($beneficiaryAccount !== env('STP_ACCOUNT_ACCEPTED')) {
+                $this->message = "Cuenta no autorizada.";
+                $retry->update([
+                    'reason_for_rejection' => $this->message
                 ]);
                 throw new Exception(json_encode([
                     'id' => 2,
-                    'mensaje' => $message
+                    'mensaje' => $this->message
                 ]));
             }
-            $amount = floatval($request->input('monto'));
+
+
+            if ($siapaSTP->paymenth->status !== 1) {
+                $this->message = "El pago ya no se encuentra pendiente.";
+                $retry->update([
+                    'reason_for_rejection' => $this->message
+                ]);
+                throw new Exception(json_encode([
+                    'id' => 2,
+                    'mensaje' => $this->message
+                ]));
+            }
+
             $siapaAmount = floatval($siapaSTP->paymenth->paymenth_a) + floatval(ModelUtility::nullSafeForNumeric($siapaSTP->paymenth));
 
-            if ($siapaAmount !== $amount) {
-                $message = "Monto no autorizado.";
+            if ($siapaAmount !== $this->amount) {
+                $this->message = "Monto no autorizado.";
                 $retry->update([
-                    'reason_for_rejection' => $message
+                    'reason_for_rejection' => $this->message
                 ]);
                 throw new Exception(json_encode([
                     'id' => 2,
-                    'mensaje' => $message
+                    'mensaje' => $this->message
                 ]));
             }
+
             $siapaSTP->paymenth->update([
                 'paymenth_at' => Carbon::now(),
                 'status' => 2
             ]);
+
             $firestore = new SiapaFirestore('SIAPA');
-            $account = $siapaSTP->paymenth->siapaUserInfo->siapaUser->account_contract;
-            $firestore->set($account, $siapaSTP->paymenth->uuid,2, $siapaSTP->full_name, $amount);
+            $firestore->set($this->account, $this->uuid,2, $this->fullName, $this->amount);
+
             $orderReceived->update([
                 'approved' => 1
             ]);
@@ -123,7 +144,7 @@ class ReceiveController extends Controller
                     'conceptoPago' => request()->input('conceptoPago')
                 ])
             ]);
-            $this->affectBalance($account, $amount, $reference);
+            $this->affectBalance($this->account, $this->amount, $reference);
             return response()->json([
                 'mensaje' => "confirmar"
             ]);
@@ -137,6 +158,14 @@ class ReceiveController extends Controller
                 ];
             } else {
                 Log::error(json_encode($e->getMessage()));
+            }
+
+            if ($this->firestore) {
+                $this->siapaSTP->paymenth->update([
+                    'status' => 0
+                ]);
+                $firestore = new SiapaFirestore('SIAPA');
+                $firestore->set($this->account, $this->uuid,0, $this->fullName, $this->amount, $this->message);
             }
 
             return response()->json($message,HttpCodeInterface::BAD_REQUEST);

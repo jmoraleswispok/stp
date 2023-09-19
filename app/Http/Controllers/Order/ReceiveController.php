@@ -99,7 +99,6 @@ class ReceiveController extends Controller
                 ]));
             }
 
-
             if ($siapaSTP->paymenth->status !== 1) {
                 $this->message = "El pago ya no se encuentra pendiente.";
                 $retry->update([
@@ -111,7 +110,7 @@ class ReceiveController extends Controller
                 ]));
             }
 
-            $siapaAmount = floatval($siapaSTP->paymenth->paymenth_a) + floatval(ModelUtility::nullSafeForNumeric($siapaSTP->paymenth));
+            $siapaAmount = floatval($siapaSTP->paymenth->paymenth_a) + floatval(ModelUtility::nullSafeForNumeric($siapaSTP->paymenth->tax));
             if ($siapaAmount !== $this->amount) {
                 $this->message = "Monto no autorizado.";
                 $retry->update([

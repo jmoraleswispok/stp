@@ -32,7 +32,7 @@ class SiapaFirestore {
         $this->document = $this->reference->document($referent);
     }
 
-    public function set($accouny, $idPaymeth, $status, $nombre, $paymenth): void
+    public function set($accouny, $idPaymeth, $status, $nombre, $paymenth, $message = ''): void
     {
         $this->getDocument($accouny);
         $this->document->set([
@@ -43,7 +43,8 @@ class SiapaFirestore {
         $this->document->delete();
         $this->document->set([
             'paymenth' => $paymenth,
-            'status' => $status
+            'status' => $status,
+            'message' => $message
         ]);
     }
 

@@ -13,6 +13,7 @@ use App\Models\Siapa\PaymenthStp;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -63,7 +64,7 @@ class ReceiveController extends Controller
                 ]);
                 throw new Exception(json_encode([
                     'id' => 1,
-                    'mensaje' => $message
+                    'mensaje' => 'devolver'
                 ]));
             });
             $this->siapaSTP = $siapaSTP;
@@ -81,7 +82,7 @@ class ReceiveController extends Controller
                 ]);
                 throw new Exception(json_encode([
                     'id' => 1,
-                    'mensaje' => $this->message
+                    'mensaje' => 'devolver'
                 ]));
             });
             $orderReceived->update([
@@ -94,7 +95,7 @@ class ReceiveController extends Controller
                 ]);
                 throw new Exception(json_encode([
                     'id' => 2,
-                    'mensaje' => $this->message
+                    'mensaje' => 'devolver'
                 ]));
             }
 
@@ -106,12 +107,11 @@ class ReceiveController extends Controller
                 ]);
                 throw new Exception(json_encode([
                     'id' => 2,
-                    'mensaje' => $this->message
+                    'mensaje' => 'devolver'
                 ]));
             }
 
             $siapaAmount = floatval($siapaSTP->paymenth->paymenth_a) + floatval(ModelUtility::nullSafeForNumeric($siapaSTP->paymenth));
-
             if ($siapaAmount !== $this->amount) {
                 $this->message = "Monto no autorizado.";
                 $retry->update([
@@ -119,18 +119,16 @@ class ReceiveController extends Controller
                 ]);
                 throw new Exception(json_encode([
                     'id' => 2,
-                    'mensaje' => $this->message
+                    'mensaje' => 'devolver'
                 ]));
             }
-
+            DB::beginTransaction();
             $siapaSTP->paymenth->update([
                 'paymenth_at' => Carbon::now(),
                 'status' => 2
             ]);
-
             $firestore = new SiapaFirestore('SIAPA');
             $firestore->set($this->account, $this->uuid,2, $this->fullName, $this->amount);
-
             $orderReceived->update([
                 'approved' => 1
             ]);
@@ -145,6 +143,7 @@ class ReceiveController extends Controller
                 ])
             ]);
             $this->affectBalance($this->account, $this->amount, $reference);
+            DB::commit();
             return response()->json([
                 'mensaje' => "confirmar"
             ]);
@@ -154,7 +153,7 @@ class ReceiveController extends Controller
                 Log::error($e->getMessage());
                 $message = [
                     'id' => 15,
-                    'mensaje' => "No fue posible aceptar el movimiento"
+                    'mensaje' => 'devolver'
                 ];
             } else {
                 Log::error(json_encode($e->getMessage()));

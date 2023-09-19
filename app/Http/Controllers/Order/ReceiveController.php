@@ -110,7 +110,7 @@ class ReceiveController extends Controller
                 ]));
             }
 
-            $siapaAmount = round(floatval($siapaSTP->paymenth->paymenth_a) + floatval(ModelUtility::nullSafeForNumeric($siapaSTP->paymenth->tax)),2);
+            $siapaAmount = round(floatval($siapaSTP->paymenth->paymenth_a) + floatval(ModelUtility::nullSafeForNumeric($siapaSTP->tax)),2);
             if ($siapaAmount !== $this->amount) {
                 $this->message = "Monto no autorizado.";
                 $retry->update([

@@ -23,7 +23,8 @@ class ReceiveController extends Controller
     protected $firestore = false;
     protected $account = '';
     protected $uuid = '';
-    protected $amount = '';
+    protected $amount = 0;
+    protected $stpAmount = 0;
     protected $fullName = '';
     protected $siapaSTP = null;
     protected $message = '';
@@ -70,7 +71,8 @@ class ReceiveController extends Controller
             $this->siapaSTP = $siapaSTP;
             $this->account = $siapaSTP->paymenth->siapaUserInfo->siapaUser->account_contract;
             $this->uuid = $siapaSTP->paymenth->uuid;
-            $this->amount = floatval($request->input('monto'));
+            $this->stpAmount = floatval($request->input('monto'));
+            $this->amount = floatval($siapaSTP->paymenth->paymenth_a);
             $this->fullName = $siapaSTP->full_name;
             $this->firestore = true;
 
@@ -109,9 +111,8 @@ class ReceiveController extends Controller
                     'mensaje' => 'devolver'
                 ]));
             }
-
             $siapaAmount = round(floatval($siapaSTP->paymenth->paymenth_a) + floatval(ModelUtility::nullSafeForNumeric($siapaSTP->tax)),2);
-            if ($siapaAmount !== $this->amount) {
+            if ($siapaAmount !== $this->stpAmount) {
                 $this->message = "Monto no autorizado.";
                 $retry->update([
                     'reason_for_rejection' => $this->message

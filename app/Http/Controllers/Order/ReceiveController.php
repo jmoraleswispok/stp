@@ -142,7 +142,7 @@ class ReceiveController extends Controller
                     'conceptoPago' => request()->input('conceptoPago')
                 ])
             ]);
-            $this->affectBalance($this->account, $this->amount, $reference);
+            $this->affectBalance($this->account, $this->amount, $reference, $siapaSTP->paymenth->uuid);
             DB::commit();
             return response()->json([
                 'mensaje' => "confirmar"
@@ -171,14 +171,15 @@ class ReceiveController extends Controller
         }
     }
 
-    private function affectBalance($account, $import, $reference)
+    private function affectBalance($account, $import, $reference, $paymenth)
     {
         try
         {
             $formData = [
                 'cuenta' => $account,
                 'importe' => $import,
-                'autoriza' => $reference
+                'autoriza' => $reference,
+                'paymenth' => $paymenth
             ];
             Log::info(json_encode([
                 'FormData' => $formData

@@ -140,7 +140,13 @@ class ReceiveController extends Controller
                     'cuentaOrdenante' => request()->input('cuentaOrdenante'),
                     'nombreOrdenante' => request()->input('nombreOrdenante'),
                     'conceptoPago' => request()->input('conceptoPago')
-                ])
+                ]),
+                'tracking_key' =>request()->input('claveRastreo'),
+                'ordering_name' => request()->input('nombreOrdenante'),
+                'ordering_inst' => request()->input('institucionOrdenante'),
+                'ordering_account' => request()->input('cuentaOrdenante'),
+                'ordering_rfc' => request()->input('rfcCurpOrdenante'),
+                'paymenth_concept' => request()->input('conceptoPago')
             ]);
             $this->affectBalance($this->account, $this->amount, $reference, $siapaSTP->paymenth->uuid);
             DB::commit();

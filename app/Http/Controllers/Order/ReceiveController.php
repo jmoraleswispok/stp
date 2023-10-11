@@ -185,7 +185,7 @@ class ReceiveController extends Controller
                 'cuenta' => $account,
                 'importe' => $import,
                 'autoriza' => $reference,
-                'paymenth' => $paymenth
+                'payment' => $paymenth
             ];
             Log::info(json_encode([
                 'FormData' => $formData

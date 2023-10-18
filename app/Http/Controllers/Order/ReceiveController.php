@@ -64,8 +64,8 @@ class ReceiveController extends Controller
                     'reason_for_rejection' => $message
                 ]);
                 throw new Exception(json_encode([
-                    'id' => 1,
-                    'mensaje' => 'devolver'
+                    'mensaje' => 'devolver',
+                    'id' => 1
                 ]));
             });
             $this->siapaSTP = $siapaSTP;
@@ -83,8 +83,8 @@ class ReceiveController extends Controller
                     'reason_for_rejection' => $this->message
                 ]);
                 throw new Exception(json_encode([
-                    'id' => 1,
-                    'mensaje' => 'devolver'
+                    'mensaje' => 'devolver',
+                    'id' => 1
                 ]));
             });
             $orderReceived->update([
@@ -96,8 +96,8 @@ class ReceiveController extends Controller
                     'reason_for_rejection' => $this->message
                 ]);
                 throw new Exception(json_encode([
-                    'id' => 2,
-                    'mensaje' => 'devolver'
+                    'mensaje' => 'devolver',
+                    'id' => 2
                 ]));
             }
 
@@ -107,8 +107,8 @@ class ReceiveController extends Controller
                     'reason_for_rejection' => $this->message
                 ]);
                 throw new Exception(json_encode([
-                    'id' => 2,
-                    'mensaje' => 'devolver'
+                    'mensaje' => 'devolver',
+                    'id' => 2
                 ]));
             }
             $siapaAmount = round(floatval($siapaSTP->paymenth->paymenth_a) + floatval(ModelUtility::nullSafeForNumeric($siapaSTP->paymenth->tax)),2);
@@ -118,8 +118,8 @@ class ReceiveController extends Controller
                     'reason_for_rejection' => $this->message
                 ]);
                 throw new Exception(json_encode([
-                    'id' => 2,
-                    'mensaje' => 'devolver'
+                    'mensaje' => 'devolver',
+                    'id' => 2
                 ]));
             }
             DB::beginTransaction();
@@ -158,8 +158,8 @@ class ReceiveController extends Controller
             if (empty($message)) {
                 Log::error($e->getMessage());
                 $message = [
-                    'id' => 15,
-                    'mensaje' => 'devolver'
+                    'mensaje' => 'devolver',
+                    'id' => 15
                 ];
             } else {
                 Log::error(json_encode($e->getMessage()));

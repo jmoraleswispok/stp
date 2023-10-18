@@ -137,7 +137,6 @@ class Handler extends ExceptionHandler implements HttpCodeInterface
             Log::error(json_encode($errors));
             return response()->json([
                 'mensaje' => "devolver",
-                'desc' => 'Falta información mandatorio para completar el pago',
                 'id' => 14
             ],HttpCodeInterface::BAD_REQUEST);
         } else {

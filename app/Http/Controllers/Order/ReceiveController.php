@@ -65,7 +65,7 @@ class ReceiveController extends Controller
                 ]);
                 throw new Exception(json_encode([
                     'mensaje' => 'devolver',
-                    'id' => 1
+                    'id' => 14
                 ]));
             });
             $this->siapaSTP = $siapaSTP;
@@ -84,7 +84,7 @@ class ReceiveController extends Controller
                 ]);
                 throw new Exception(json_encode([
                     'mensaje' => 'devolver',
-                    'id' => 1
+                    'id' => 6
                 ]));
             });
             $orderReceived->update([
@@ -97,7 +97,7 @@ class ReceiveController extends Controller
                 ]);
                 throw new Exception(json_encode([
                     'mensaje' => 'devolver',
-                    'id' => 2
+                    'id' => 17
                 ]));
             }
 
@@ -108,7 +108,7 @@ class ReceiveController extends Controller
                 ]);
                 throw new Exception(json_encode([
                     'mensaje' => 'devolver',
-                    'id' => 2
+                    'id' => 15
                 ]));
             }
             $siapaAmount = round(floatval($siapaSTP->paymenth->paymenth_a) + floatval(ModelUtility::nullSafeForNumeric($siapaSTP->paymenth->tax)),2);
@@ -119,7 +119,7 @@ class ReceiveController extends Controller
                 ]);
                 throw new Exception(json_encode([
                     'mensaje' => 'devolver',
-                    'id' => 2
+                    'id' => 16
                 ]));
             }
             DB::beginTransaction();

@@ -127,8 +127,10 @@ class ReceiveController extends Controller
                 'paymenth_at' => Carbon::now(),
                 'status' => 2
             ]);
+
             $firestore = new SiapaFirestore('SIAPA');
             $firestore->set($this->account, $this->uuid,2, $this->fullName, $this->amount);
+
             $orderReceived->update([
                 'approved' => 1
             ]);
@@ -148,7 +150,12 @@ class ReceiveController extends Controller
                 'ordering_rfc' => request()->input('rfcCurpOrdenante'),
                 'paymenth_concept' => request()->input('conceptoPago')
             ]);
-            $this->affectBalance($this->account, $this->amount, $reference, $siapaSTP->paymenth->uuid);
+
+            //solo si es de siapa se enviara
+            if ($siapaSTP->paymenth->siapaUserInfo->siapaUser->is_inscription == 0){
+                $this->affectBalance($this->account, $this->amount, $reference, $siapaSTP->paymenth->uuid);
+            }
+
             DB::commit();
             return response()->json([
                 'mensaje' => "confirmar"
@@ -169,6 +176,7 @@ class ReceiveController extends Controller
                 $this->siapaSTP->paymenth->update([
                     'status' => 0
                 ]);
+
                 $firestore = new SiapaFirestore('SIAPA');
                 $firestore->set($this->account, $this->uuid,0, $this->fullName, $this->amount, $this->message);
             }

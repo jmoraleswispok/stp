@@ -68,6 +68,10 @@ class ReceiveController extends Controller
                     'id' => 14
                 ]));
             });
+            $logPaymenths = $siapaSTP->paymenth->log_paymenths + 1;
+            $siapaSTP->paymenth->update([
+                'log_paymenths' => $logPaymenths
+            ]);
             $this->siapaSTP = $siapaSTP;
             $this->account = $siapaSTP->paymenth->siapaUserInfo->siapaUser->account_contract;
             $this->uuid = $siapaSTP->paymenth->uuid;

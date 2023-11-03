@@ -19,7 +19,8 @@ class Paymenth extends Model
 
     protected $fillable = [
         'paymenth_at',
-        'status'
+        'status',
+        'log_paymenths'
     ];
 
     public function siapaUserInfo(): BelongsTo

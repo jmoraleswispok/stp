@@ -53,6 +53,12 @@ class ReceiveController extends Controller
                 'request' => json_encode($request->all())
             ]);
 
+            if ($orderReceived->approved === 1) {
+                return response()->json([
+                    'mensaje' => "confirmar"
+                ]);
+            }
+
             $reference = $request->input('referenciaNumerica');
             $siapaSTP = PaymenthStp::query()->with(['paymenth' => function($query) {
                 return $query->with(['siapaUserInfo' => function($query) {

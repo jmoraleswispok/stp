@@ -178,9 +178,11 @@ class ReceiveController extends Controller
             }
 
             if ($this->firestore) {
-                $this->siapaSTP->paymenth->update([
-                    'status' => 0
-                ]);
+                if ($this->siapaSTP->paymenth !== 2) {
+                    $this->siapaSTP->paymenth->update([
+                        'status' => 0
+                    ]);
+                }
 
                 $firestore = new SiapaFirestore('SIAPA');
                 $firestore->set($this->account, $this->uuid,0, $this->fullName, $this->amount, $this->message);

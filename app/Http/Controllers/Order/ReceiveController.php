@@ -184,7 +184,7 @@ class ReceiveController extends Controller
             }
 
             if ($this->firestore) {
-                if ($this->siapaSTP->paymenth !== 2) {
+                if ($this->siapaSTP->paymenth->status !== 2) {
                     $this->siapaSTP->paymenth->update([
                         'status' => 0
                     ]);
